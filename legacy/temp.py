@@ -9,7 +9,7 @@ import json
 
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage
-from rfp_extracter import extract_text_from_pdf, extract_text_from_docx, convert_rfp_to_RAG
+from Dhq_chatbot.chat_demo_test.tools.rfp_extracter import extract_text_from_pdf, extract_text_from_docx, convert_rfp_to_RAG
 
 # Windows 환경 비동기 설정
 if platform.system() == "Windows":

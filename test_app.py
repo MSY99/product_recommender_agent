@@ -25,7 +25,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langgraph.checkpoint.memory import MemorySaver
 
-from rfp_extracter import extract_text_from_pdf, extract_text_from_docx, convert_rfp_to_RAG
+from tools.rfp_extracter import extract_text_from_pdf, extract_text_from_docx, convert_rfp_for_RAG
 
 
 # 환경 변수 세팅 (필요시)
@@ -138,7 +138,7 @@ with st.sidebar:
 
             if txt_path:
                 st.success("텍스트 추출 완료!")
-                rag_term = convert_rfp_to_RAG(txt_path)
+                rag_term = convert_rfp_for_RAG(txt_path)
                 st.session_state["rag_term"] = rag_term
                 st.markdown("#### ➡️ 추출된 RFP 요약")
                 st.text_area("->", rag_term, height=300, disabled=True)

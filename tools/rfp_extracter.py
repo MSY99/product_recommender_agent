@@ -2,9 +2,7 @@
 RFP 파일의 타입에 따라 전처리 및 검색에 필요한 내용을 추출하는 모듈 모음
 """
 
-import os
 import io
-import fitz
 import tempfile
 from docx import Document
 
@@ -78,33 +76,43 @@ def extract_text_from_docx(file_buffer):
     return tmp_txt_path
 
 
-def convert_rfp_to_RAG(tmp_txt_path, client=gemini_client):
+def convert_rfp_for_RAG(tmp_txt_path, client=gemini_client):
     with open(tmp_txt_path, 'r', encoding='utf-8') as f:
-        extract_text_from_pdf = f.read()
+        extracted_text = f.read()
 
-    prompt_for_convert = f"""아래 RFP 문서를 검토하여,
+#     prompt_for_convert = f"""아래의 제품 견적 요청서(RFP) 문서에서 필요한 제품의 스펙 요구 조건을 다음과 같은 규칙에 따라 추출하고 정리해주세요.
 
-- 구매자가 원하는 제품(예: 스토리지, 서버)의 모든 필수 및 주요 요구조건(용량, 성능, 확장성, 프로토콜, 폼팩터, 보안, 가용성 등)을
-- **자연스럽고 완결된 한 단락의 줄글(자연어 문장 모음)**로 요약해 주세요.
+# **제품 스펙 요구 조건 추출 규칙**
+# 1. 원본 파일에서 언급한 정보를 그대로 포함해야 합니다.
+# 2. 추출한 정보는 아래의 작성 예시와 같이 key-value 형태로 작성해야 합니다.
+# 3. 정보를 추출할 때, key 값은 제품의 정보 카테고리를 나타내며 value 값은 해당 카테고리에 대한 제품의 구체적인 정보를 나타냅니다.
+# 4. key 값은 원본 파일의 제품 요구 조건을 설명하기에 적합해야 하며, 작성 예시와 같지 않아도 됩니다.
 
-예시)
+# **작성 예시**
+# "product_name": "IBM Storage Scale",
+# "storage_type": "소프트웨어 정의 스토리지",
+# "supported_os": "IBM AIX, Linux (Red Hat, SUSE Linux Enterprise Server), Microsoft Windows Server 2012, Microsoft Windows 7, IBM z Systems",
+# "protocols": "POSIX, GPFS, NFS v4.0, SMB v3.0",
+# "big_data_support": "Hadoop MapReduce",
+# "cloud_support": "OpenStack Cinder(블록), OpenStack Swift(오브젝트), S3(오브젝트)",
+# "cloud_object_storage": "IBM Cloud Storage System (Cleversafe), Amazon S3, IBM Cloud Native Object, OpenStack Swift, Amazon S3 호환",
+# "max_files_per_filesystem": "2의 64승(900경)개 파일",
+# "max_filesystem_size": "8 엑사바이트(EB)",
+# "max_data_capacity": "10억 페타바이트",
+# "min_nodes": "1",
+# "max_nodes": "16,384"
+# ...
 
-“이 프로젝트에서는 최소 2PB의 물리적 저장 용량과 SSD, HDD, 하이브리드 구성을 모두 지원하는 고성능 스토리지가 필요합니다. FC와 iSCSI 프로토콜을 모두 지원해야 하며, 자동 계층화, 데이터 중복 제거, 압축, AES-256 기반 암호화, 양방향 자동 페일오버 및 무중단 운영, 통합 관리 기능을 제공해야 합니다. 또한 다양한 운영체제와의 호환성, 스토리지 확장성, 고가용성 및 원격 관리 기능도 필수적으로 요구됩니다.”
 
-이처럼,
-
-- **RFP의 주요 요구조건을 하나의 자연스러운 줄글 단락**으로 작성해 주세요.
-- 군더더기 없이, 실제 제품 비교에 바로 활용될 수 있도록 요약해 주세요.
-
-[ RFP 문서 텍스트 ]
-{extract_text_from_pdf}"""
+# [ RFP 문서 텍스트 ]
+# {extracted_text}"""
     
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=[prompt_for_convert]
-    )
+#     response = client.models.generate_content(
+#         model="gemini-2.5-flash",
+#         contents=[prompt_for_convert]
+#     )
 
-    rfp_search_term = response.text
+#     rfp_search_term = response.text
 
-    return rfp_search_term.strip()
+    return extracted_text.strip()
 

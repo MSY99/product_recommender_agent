@@ -1,0 +1,9 @@
+{
+    "product_recomendation_tools": {
+      "command": "python",
+      "args": [
+        "/workspace/Dhq_chatbot/chat_demo_test/tools/mcps/product_recommend.py"
+      ],
+      "transport": "stdio"
+    }
+  }
