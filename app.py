@@ -17,7 +17,7 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.prebuilt import create_react_agent
 from utils import astream_graph, random_uuid
 
-from tools.rfp_extracter import extract_text_from_docx, extract_text_from_pdf, convert_rfp_for_RAG
+from tools.rfp_extracter import extract_text_from_hwp, extract_text_from_pdf, convert_rfp_for_RAG
 
 from dotenv import load_dotenv
 load_dotenv("/workspace/Dhq_chatbot/chat_demo_test/.env")
@@ -172,8 +172,8 @@ with st.sidebar:
     st.subheader("📨 File Upload")
 
     uploaded_file = st.file_uploader(
-        "PDF 또는 DOCX 확장자의 RFP(규격서) 파일을 올려주세요.",
-        type=["pdf", "docx"],
+        "PDF 또는 HWP 확장자의 RFP(규격서) 파일을 올려주세요.",
+        type=["pdf", "hwp"],
         key="file_uploader"
     )
 
@@ -198,8 +198,8 @@ with st.sidebar:
             file_type = None
             if uploaded_file.name.lower().endswith(".pdf"):
                 file_type = "pdf"
-            elif uploaded_file.name.lower().endswith(".docx"):
-                file_type = "docx"
+            elif uploaded_file.name.lower().endswith(".hwp"):
+                file_type = "hwp"
 
             file_buffer = io.BytesIO(file_bytes)
             file_buffer.seek(0)
@@ -207,9 +207,9 @@ with st.sidebar:
             if file_type == "pdf":
                 st.info("PDF 텍스트 추출 중...")
                 txt_path = extract_text_from_pdf(file_buffer)
-            elif file_type == "docx":
-                st.info("DOCX 텍스트 추출 중...")
-                txt_path = extract_text_from_docx(file_buffer)
+            elif file_type == "hwp":
+                st.info("HWP 텍스트 추출 중...")
+                txt_path = extract_text_from_hwp(file_buffer)
             else:
                 st.warning("지원하지 않는 파일 형식입니다.")
                 txt_path = None

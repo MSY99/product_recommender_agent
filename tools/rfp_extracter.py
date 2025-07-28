@@ -1,9 +1,12 @@
 """
 RFP 파일의 타입에 따라 전처리 및 검색에 필요한 내용을 추출하는 모듈 모음
 """
-
+import re
 import io
 import tempfile
+import olefile
+import zlib
+import struct
 from docx import Document
 
 from dotenv import load_dotenv
@@ -13,6 +16,14 @@ load_dotenv("/workspace/Dhq_chatbot/pdf2DB_Agent/.env")
 from google import genai
 import pathlib
 from google.genai.types import Part
+import unicodedata
+
+def clean_text(text):
+    # 한자 및 보기 불편한 제어 문자 제거
+    text = re.sub(r'[一-龥]', '', text)  # 한자 제거
+    text = re.sub(r'[\x00-\x1F\x7F]', '', text)  # 제어문자 제거
+    text = unicodedata.normalize("NFC", text)  # 정규화
+    return text
 
 gemini_client = genai.Client()
 
@@ -70,6 +81,60 @@ def extract_text_from_docx(file_buffer):
 
     text = "\n".join([para.text for para in doc.paragraphs])
 
+    with tempfile.NamedTemporaryFile('w', suffix='.txt', dir='/tmp', delete=False, encoding="utf-8") as tmpf:
+        tmpf.write(text)
+        tmp_txt_path = tmpf.name
+    return tmp_txt_path
+
+def extract_text_from_hwp(file_buffer):
+    f = olefile.OleFileIO(file_buffer)
+    dirs = f.listdir()
+
+    if ["FileHeader"] not in dirs or ["\x05HwpSummaryInformation"] not in dirs:
+        raise Exception("Not Valide HWP file")
+
+    header = f.openstream("FileHeader")
+    header_data = header.read()
+    is_compressed = (header_data[36] & 1) == 1
+
+    nums = []
+
+    for d in dirs:
+        if d[0] == "BodyText":
+            nums.append(int(d[1][len("Section"):]))
+    
+    sections = ["BodyText/Section" + str(x) for x in sorted(nums)]
+
+    text = ""
+
+    for section in sections:
+        bodytext = f.openstream(section)
+        data = bodytext.read()
+        if is_compressed:
+            unpacked_data = zlib.decompress(data, -15)
+        else:
+            unpacked_data = data
+
+        section_text = ""
+        i = 0
+        size = len(unpacked_data)
+
+        while i < size:
+            header = struct.unpack_from("<I", unpacked_data, i)[0]
+            rec_type = header & 0x3ff
+            rec_len = (header >> 20) & 0xfff
+
+            if rec_type in [67]:
+                rec_data = unpacked_data[i+4: i+4+rec_len]
+                section_text += rec_data.decode('utf-16')
+                section_text += "\n"
+
+            i += 4 + rec_len
+
+        text += section_text
+        text += "\n"
+
+        
     with tempfile.NamedTemporaryFile('w', suffix='.txt', dir='/tmp', delete=False, encoding="utf-8") as tmpf:
         tmpf.write(text)
         tmp_txt_path = tmpf.name
