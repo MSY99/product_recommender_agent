@@ -4,7 +4,6 @@ import io
 import platform 
 import asyncio
 import nest_asyncio
-from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 
@@ -26,7 +25,6 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langgraph.checkpoint.memory import MemorySaver
 
 from tools.rfp_extracter import extract_text_from_pdf, extract_text_from_docx, convert_rfp_for_RAG
-
 
 # 환경 변수 세팅 (필요시)
 from dotenv import load_dotenv

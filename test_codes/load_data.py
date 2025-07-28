@@ -43,7 +43,7 @@ for collection_name in collection_names:
         })
 
     # 저장
-    output_path = f"/workspace/data/tmp_folder/{collection_name}_documents.json"
+    output_path = f"/workspace/data/tmp2_folder/{collection_name}_documents.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
