@@ -17,13 +17,13 @@ from langchain_core.runnables import RunnableConfig
 from langgraph.prebuilt import create_react_agent
 from utils import astream_graph, random_uuid
 
-from tools.rfp_extracter import extract_text_from_hwp, extract_text_from_pdf, convert_rfp_for_RAG
+from tools.rfp_extracter import extract_text_from_hwp, extract_text_from_pdf_by_olmocr, convert_rfp_for_RAG
 
 from dotenv import load_dotenv
 load_dotenv("/workspace/Dhq_chatbot/chat_demo_test/.env")
 
 CONFIG_FILE_PATH = "/workspace/Dhq_chatbot/chat_demo_test/mcp_config.json"
-MODEL_NAME = "gpt-4o"
+MODEL_NAME = "claude-3-7-sonnet-latest"
 
 SYSTEM_PROMPT = """<ROLE>
 You are a smart agent with an ability to use tools. 
@@ -75,6 +75,7 @@ Guidelines:
 
 OUTPUT_TOKEN_INFO = {
     "gpt-4o": {"max_tokens": 16000},
+    "claude-3-7-sonnet-latest": {"max_tokens": 16000},
     "claude-sonnet-4-20250514": {"max_tokens": 64000},
 }
 
@@ -153,7 +154,7 @@ async def init_mcp_client(config_path = CONFIG_FILE_PATH, model_name = MODEL_NAM
         st.error(f"Error when initializing MCP client: {e}")
         return None, [], None
 
-# ====== MCP Agen 설정 세션 변수 초기화 ======
+# ====== MCP Agent 설정 세션 변수 초기화 ======
 if "mcp_agent" not in st.session_state or st.session_state.mcp_agent is None:
     with st.spinner("🔄 Initializing Agent..."):
         mcp_agent, tools, client = st.session_state.event_loop.run_until_complete(
@@ -206,7 +207,8 @@ with st.sidebar:
 
             if file_type == "pdf":
                 st.info("PDF 텍스트 추출 중...")
-                txt_path = extract_text_from_pdf(file_buffer)
+                # txt_path = extract_text_from_pdf(file_buffer)
+                txt_path = extract_text_from_pdf_by_olmocr(file_buffer, uploaded_file.name)
             elif file_type == "hwp":
                 st.info("HWP 텍스트 추출 중...")
                 txt_path = extract_text_from_hwp(file_buffer)

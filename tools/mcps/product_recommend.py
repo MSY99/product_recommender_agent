@@ -50,6 +50,85 @@ def get_rfp_summary(rfp_text: str) -> str:
     except Exception as e:
         return f"Error reading RFP summary: {str(e)}"
 
+# 추천이 필요한 제품군에 따라 담당자 연락처를 전달하는 함수
+@mcp.tool()
+def get_contact_info_for_product():
+    """
+    RFP에서 요구하는 제품군의 종류에 따라 담당자 연락처를 전달
+    """
+    contact_info = {
+                "IBM H/W": {
+                    "영업 대표": {
+                        "이름": "왕학준 책임",
+                        "전화": "02-2120-7043",
+                        "이메일": "hagjun_wang1@kolon.com"
+                    },
+                    "기술 문의": {
+                        "이름": "이정우 수석",
+                        "전화": "02-2120-7063",
+                        "이메일": "myfeel@kolon.com"
+                    },
+                    "마케팅": {
+                        "이름": "조은실 수석",
+                        "전화": "02-2120-7194",
+                        "이메일": "jksss3@kolon.com"
+                    }
+                },
+                "IBM S/W": {
+                    "영업 대표": {
+                        "이름": "노태영 수석",
+                        "전화": "02-2120-7239",
+                        "이메일": "taeyoung_noh@kolon.com"
+                    },
+                    "기술 문의(DB)": {
+                        "이름": "금윤철 팀장",
+                        "전화": "02-2120-7237",
+                        "이메일": "yuncheol_keum@kolon.com"
+                    },
+                    "기술 문의(WAS)": {
+                        "이름": "양대현 수석",
+                        "전화": "02-2120-7231",
+                        "이메일": "daehyun_yang@kolon.com"
+                    },
+                    "마케팅": {
+                        "이름": "박은지 수석",
+                        "전화": "02-2120-7124",
+                        "이메일": "eunji_park6@kolon.com"
+                    }
+                },
+                "Dell": {
+                    "견적 문의 1": {
+                        "이름": "정다운 책임",
+                        "전화": "02-2120-7196",
+                        "이메일": "dawoon_jeong@kolon.com"
+                    },
+                    "견적 문의 2": {
+                        "이름": "서동연 책임",
+                        "전화": "02-2120-7081",
+                        "이메일": "dongyon_seo@kolon.com"
+                    },
+                    "기술 문의": {
+                        "이름": "안재용 팀장",
+                        "전화": "02-2120-7062",
+                        "이메일": "jyan@kolon.com"
+                    },
+                    "마케팅": {
+                        "이름": "김지웅 책임",
+                        "전화": "02-2120-7038",
+                        "이메일": "jiwoong_kim@kolon.com"
+                    }
+                }
+            }
+    
+    # if product_type == "IBM H/W":
+    #     return contact_info["IBM H/W"]
+    # elif product_type == "IBM S/W":
+    #     return contact_info["IBM S/W"]
+    # elif product_type == "Dell":
+    #     return contact_info["Dell"]
+
+    return contact_info
+
 # collection 선택하는 함수
 @mcp.tool()
 def select_collection_list(query: str) -> List[str]:

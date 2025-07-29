@@ -3,6 +3,9 @@ RFP 파일의 타입에 따라 전처리 및 검색에 필요한 내용을 추�
 """
 import re
 import io
+import os
+import logging
+import requests
 import tempfile
 import olefile
 import zlib
@@ -70,6 +73,39 @@ def extract_text_from_pdf(file_buffer, client=gemini_client):
         tmp_txt_path = tmpf.name
 
     return tmp_txt_path
+
+def extract_text_from_pdf_by_olmocr(file_buffer, filename):
+    """
+    Extract text from a scanned PDF file using OCR.
+    :param pdf_path: Path to the PDF file.
+    :return: Extracted text from the PDF.
+    """
+    url = "http://192.168.88.203:52901/ocr"
+
+    try:
+        files = {
+            "file": (filename, file_buffer, "application/pdf")
+        }
+        response = requests.post(url, files=files)
+
+        if response.status_code == 200:
+            result = response.json()
+            extracted_txt = result.get("text", "")
+
+            with tempfile.NamedTemporaryFile('w', suffix='.txt', dir='/tmp', delete=False, encoding='utf-8') as tmpf:
+                tmpf.write(extracted_txt)
+                tmp_txt_path = tmpf.name
+
+            return tmp_txt_path
+        else:
+            logging.error(
+                f"OCR 서버 오류: {response.status_code} - {response.text}"
+            )
+            return "OCR 서버 오류로 텍스트 추출에 실패했습니다."
+    except Exception as e:
+        logging.error(f"OCR 요청 실패: {e}")
+        return "OCR 서버 요청에 실패했습니다. 서버가 실행 중인지 확인하세요."
+    
 
 def extract_text_from_docx(file_buffer):
 
